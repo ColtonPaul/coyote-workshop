@@ -37,7 +37,50 @@ namespace PetImages.Controllers
 
             var imageItem = image.ToImageItem(accountName);
 
-            throw new NotImplementedException();
+                        try
+            {
+                var imageFromDatabase = await CosmosDatabase.GetItemAsync<ImageItem>(
+                    Constants.ImageContainerName,
+                     imageItem.PartitionKey,
+                     imageItem.Id
+                 );
+                 
+                 if (imageFromDatabase.LastModifiedTimestamp > imageItem.LastModifiedTimestamp)
+                 {
+                     return Conflict();
+                 }
+                 else
+                 {
+                     try
+                     {
+                         await CosmosDatabase.UpsertItemAsync<ImageItem>(
+                         Constants.ImageContainerName,
+                         imageItem,
+                         imageFromDatabase.ETag //Verifies that there hasn't been an upsert from second actor in between last get and this request
+                         );
+                     }
+                     catch (DatabasePreconditionFailedException)
+                     {
+                         return Conflict();
+                     }
+                 }
+             }
+             catch (DatabaseItemDoesNotExistException)
+             {
+                 try
+                 {
+                     await CosmosDatabase.CreateItemAsync<ImageItem>(
+                         Constants.ImageContainerName,
+                         imageItem
+                     );
+                 }
+                 catch (DatabaseItemAlreadyExistsException)
+                 {
+                     return Conflict();
+                 }
+             }
+ 
+             return Ok(imageItem.ToImage());
         }
 
         [HttpGet]

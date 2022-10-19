@@ -118,6 +118,17 @@ namespace PetImagesTest.Clients
                 (statusCode1 == HttpStatusCode.Conflict && statusCode2 == HttpStatusCode.OK) ||
                 (statusCode1 == HttpStatusCode.BadRequest && statusCode2 == HttpStatusCode.OK) ||
                 (statusCode1 == HttpStatusCode.OK && statusCode2 == HttpStatusCode.OK));
+
+
+             var imageResponse = await serviceClient.GetImageAsync(accountName, imageName);
+             if (statusCode1 == HttpStatusCode.OK && statusCode2 == HttpStatusCode.Conflict)
+             {
+                 Assert.IsTrue(imageResponse.Resource.LastModifiedTimestamp.Equals(utcNow));
+             }
+             else if (statusCode2 == HttpStatusCode.OK)
+             {
+                 Assert.IsTrue(imageResponse.Resource.LastModifiedTimestamp.Equals(utcNow.AddDays(1)));
+             }
         }
 
         public async Task TestSecondScenarioCreateAsync()
@@ -169,6 +180,17 @@ namespace PetImagesTest.Clients
                 (statusCode1 == HttpStatusCode.Conflict && statusCode2 == HttpStatusCode.OK) ||
                 (statusCode1 == HttpStatusCode.BadRequest && statusCode2 == HttpStatusCode.OK) ||
                 (statusCode1 == HttpStatusCode.OK && statusCode2 == HttpStatusCode.OK));
+
+
+             var imageResponse = await serviceClient.GetImageAsync(accountName, imageName);
+             if (statusCode1 == HttpStatusCode.OK && statusCode2 == HttpStatusCode.Conflict)
+             {
+                 Assert.IsTrue(imageResponse.Resource.LastModifiedTimestamp.Equals(utcNow));
+             }
+             else if (statusCode2 == HttpStatusCode.OK)
+             {
+                 Assert.IsTrue(imageResponse.Resource.LastModifiedTimestamp.Equals(utcNow.AddDays(1)));
+             }
         }
 
         [TestMethod]
